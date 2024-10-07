@@ -7,12 +7,22 @@ export const APP_ROUTER = {
     ORDER: "/order",
     PRODUCT: "/product",
     ADD_PRODUCT: "/product/add-product",
-
+    CHAT: "/chat",
+    CUSTOMER: "/customer",
+    VOUCHER: "/voucher",
+    CREATEVOUCHER: "/create-voucher",
+    LISTPRODUCT: "/list-product",
+    LISTORDER: "/list-order",
     CATEGORY: "/categorys",
+    PRODUCTDETAIL: "/product46",
+    ADD_PRODUCT: "/product-add",
+    LIST_PROVIDER: "/providers",
+    REVENUECHART: "/revenue-chart",
 
     AUTH: "auth",
     LOGIN: "/auth/login",
     REGISTER: "/auth/register",
+    LOGOUT: "/auth/logout",
     CHANGE_PASSWORD: "change-password",
     REFRESH_TOKEN: "/auth/accessToken-generate",
 };

@@ -1,0 +1,206 @@
+{
+    "users": {
+        "count": 20,
+        "data": [
+            {
+                "id": "KH001",
+                "image": "https://via.placeholder.com/150",
+                "name": "Nguyễn Văn A",
+                "phone": "0123456789",
+                "lastPurchase": "2024-08-01",
+                "totalSpent": 5000000
+            },
+            {
+                "id": "KH002",
+                "image": "https://via.placeholder.com/150",
+                "name": "Trần Thị B",
+                "phone": "0987654321",
+                "lastPurchase": "2024-08-05",
+                "totalSpent": 3000000
+            },
+            {
+                "id": "KH003",
+                "image": "https://via.placeholder.com/150",
+                "name": "Lê Văn C",
+                "phone": "0912345678",
+                "lastPurchase": "2024-08-10",
+                "totalSpent": 7000000
+            },
+            {
+                "id": "KH004",
+                "image": "https://via.placeholder.com/150",
+                "name": "Phạm Thị D",
+                "phone": "0934567890",
+                "lastPurchase": "2024-08-12",
+                "totalSpent": 4500000
+            },
+            {
+                "id": "KH005",
+                "image": "https://via.placeholder.com/150",
+                "name": "Ngô Văn E",
+                "phone": "0998765432",
+                "lastPurchase": "2024-08-15",
+                "totalSpent": 3500000
+            },
+            {
+                "id": "KH006",
+                "image": "https://via.placeholder.com/150",
+                "name": "Vũ Thị F",
+                "phone": "0901234567",
+                "lastPurchase": "2024-08-18",
+                "totalSpent": 5500000
+            },
+            {
+                "id": "KH007",
+                "image": "https://via.placeholder.com/150",
+                "name": "Đỗ Văn G",
+                "phone": "0913456789",
+                "lastPurchase": "2024-08-20",
+                "totalSpent": 2500000
+            },
+            {
+                "id": "KH008",
+                "image": "https://via.placeholder.com/150",
+                "name": "Hoàng Thị H",
+                "phone": "0923456789",
+                "lastPurchase": "2024-08-22",
+                "totalSpent": 6000000
+            },
+            {
+                "id": "KH009",
+                "image": "https://via.placeholder.com/150",
+                "name": "Phan Văn I",
+                "phone": "0932345678",
+                "lastPurchase": "2024-08-25",
+                "totalSpent": 4000000
+            },
+            {
+                "id": "KH010",
+                "image": "https://via.placeholder.com/150",
+                "name": "Lý Thị J",
+                "phone": "0987654321",
+                "lastPurchase": "2024-08-28",
+                "totalSpent": 8000000
+            },
+            {
+                "id": "KH011",
+                "image": "https://via.placeholder.com/150",
+                "name": "Nguyễn Văn K",
+                "phone": "0912765432",
+                "lastPurchase": "2024-08-30",
+                "totalSpent": 4200000
+            },
+            {
+                "id": "KH012",
+                "image": "https://via.placeholder.com/150",
+                "name": "Trần Thị L",
+                "phone": "0921345678",
+                "lastPurchase": "2024-09-01",
+                "totalSpent": 6300000
+            },
+            {
+                "id": "KH013",
+                "image": "https://via.placeholder.com/150",
+                "name": "Lê Văn M",
+                "phone": "0939876543",
+                "lastPurchase": "2024-09-03",
+                "totalSpent": 3700000
+            },
+            {
+                "id": "KH014",
+                "image": "https://via.placeholder.com/150",
+                "name": "Phạm Thị N",
+                "phone": "0902233445",
+                "lastPurchase": "2024-09-05",
+                "totalSpent": 4800000
+            },
+            {
+                "id": "KH015",
+                "image": "https://via.placeholder.com/150",
+                "name": "Ngô Văn O",
+                "phone": "0911223344",
+                "lastPurchase": "2024-09-07",
+                "totalSpent": 5200000
+            },
+            {
+                "id": "KH016",
+                "image": "https://via.placeholder.com/150",
+                "name": "Vũ Thị P",
+                "phone": "0921234567",
+                "lastPurchase": "2024-09-09",
+                "totalSpent": 3900000
+            },
+            {
+                "id": "KH017",
+                "image": "https://via.placeholder.com/150",
+                "name": "Đỗ Văn Q",
+                "phone": "0932345678",
+                "lastPurchase": "2024-09-11",
+                "totalSpent": 4500000
+            },
+            {
+                "id": "KH018",
+                "image": "https://via.placeholder.com/150",
+                "name": "Hoàng Thị R",
+                "phone": "0941234567",
+                "lastPurchase": "2024-09-13",
+                "totalSpent": 7200000
+            },
+            {
+                "id": "KH019",
+                "image": "https://via.placeholder.com/150",
+                "name": "Phan Văn S",
+                "phone": "0952345678",
+                "lastPurchase": "2024-09-15",
+                "totalSpent": 3800000
+            },
+            {
+                "id": "KH020",
+                "image": "https://via.placeholder.com/150",
+                "name": "Lý Thị T",
+                "phone": "0961234567",
+                "lastPurchase": "2024-09-16",
+                "totalSpent": 9500000
+            }
+        ]
+    },
+
+    "programs": [
+        {
+            "name": "Chương trình A",
+            "code": "CT001",
+            "status": "Hoạt động",
+            "remainingKM": 100,
+            "kmPerOrder": 10,
+            "startDate": "01/01/2024",
+            "endDate": "31/12/2024"
+        },
+        {
+            "name": "Chương trình B",
+            "code": "CT002",
+            "status": "Ngừng",
+            "remainingKM": 50,
+            "kmPerOrder": 5,
+            "startDate": "01/03/2024",
+            "endDate": "01/08/2024"
+        },
+        {
+            "name": "Chương trình C",
+            "code": "CT003",
+            "status": "Hoàn thành",
+            "remainingKM": 0,
+            "kmPerOrder": 15,
+            "startDate": "01/05/2023",
+            "endDate": "30/11/2023"
+        },
+        {
+            "name": "Chương trình D",
+            "code": "CT004",
+            "status": "Hoạt động",
+            "remainingKM": 75,
+            "kmPerOrder": 7,
+            "startDate": "01/06/2024",
+            "endDate": "01/12/2024"
+        }
+    ]
+}
