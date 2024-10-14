@@ -28,7 +28,9 @@ import {
     WalletOutlined,
     LineChartOutlined,
     FundOutlined,
-    MessageOutlined,
+    CommentOutlined,
+    DiffOutlined,
+    DeploymentUnitOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu, theme } from "antd";
 import ToggleThemeButton from "../../components/ToggleTheme/ToggleThemeButton";
@@ -70,17 +72,22 @@ function MainLayout() {
                 <ShoppingCartOutlined />
             ),
             getItem(
-                <Link to={APP_ROUTER.LISTPRODUCT}>Hàng hóa</Link>,
+                <Link to={APP_ROUTER.LISTPRODUCT}>Sản phẩm</Link>,
                 "4",
                 <ProductOutlined />
             ),
             getItem(
-                <Link to={APP_ROUTER.PRODUCT}>Nhập hàng</Link>,
+                <Link to={APP_ROUTER.LIST_STORES}>Nhập hàng</Link>,
                 "5",
                 <ImportOutlined />
             ),
             getItem(
-                <Link to={APP_ROUTER.PRODUCT}>Kho hàng</Link>,
+                <Link to={APP_ROUTER.STORE_RECEIPT}>Phiếu nhập hàng</Link>,
+                "21",
+                <DiffOutlined />
+            ),
+            getItem(
+                <Link to={APP_ROUTER.WAREHOUSE_PRODUCT}>Kho hàng</Link>,
                 "6",
                 <ShopOutlined />
             ),
@@ -89,10 +96,20 @@ function MainLayout() {
                 "7",
                 <PercentageOutlined />
             ),
+            getItem(
+                <Link to={APP_ROUTER.LIST_CATEGORY}>Loại sản phẩm</Link>,
+                "22",
+                <DeploymentUnitOutlined />
+            ),
+            getItem(
+                <Link to={APP_ROUTER.LIST_EMPLOYEE}>Nhân viên</Link>,
+                "23",
+                <TeamOutlined />
+            ),
         ]),
         getItem("Khách hàng", "sub2", <SolutionOutlined />, [
             getItem(
-                <Link to={APP_ROUTER.CUSTOMER}>Khách hàng</Link>,
+                <Link to={APP_ROUTER.USER}>Khách hàng</Link>,
                 "8",
                 <UserOutlined />
             ),
@@ -101,15 +118,11 @@ function MainLayout() {
                 "9",
                 <SisternodeOutlined />
             ),
-            getItem(
-                <Link to={APP_ROUTER.PRODUCT}>Nhóm khách hàng</Link>,
-                "10",
-                <TeamOutlined />
-            ),
+
             getItem(
                 <Link to={APP_ROUTER.CHAT}>Tư vấn khách hàng</Link>,
                 "21",
-                <MessageOutlined />
+                <CommentOutlined />
             ),
         ]),
         getItem("Tiền bạc", "sub3", <DollarOutlined />, [
@@ -141,7 +154,7 @@ function MainLayout() {
                 <FundOutlined />
             ),
             getItem(
-                <Link to={APP_ROUTER.STORE}>Hàng hóa</Link>,
+                <Link to={APP_ROUTER.REPORT_CATEGORY}>Hàng hóa</Link>,
                 "16",
                 <InboxOutlined />
             ),
@@ -192,7 +205,11 @@ function MainLayout() {
                         width={250}
                         collapsible
                         collapsed={collapsed}
-                        className="shadow-md overflow-y-auto max-h-screen "
+                        className="shadow-md overflow-y-auto max-h-screen [&::-webkit-scrollbar]:w-2
+                                [&::-webkit-scrollbar-track]:bg-gray-100
+                                [&::-webkit-scrollbar-thumb]:bg-gray-300
+                                dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+                                dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
                         onCollapse={(value) => setCollapsed(value)}
                         theme={darkTheme ? "dark" : "light"}
                     >
@@ -210,7 +227,13 @@ function MainLayout() {
                         ></ToggleThemeButton>
                     </Sider>
 
-                    <Layout className="overflow-y-auto max-h-screen">
+                    <Layout
+                        className="overflow-y-auto max-h-screen [&::-webkit-scrollbar]:w-2
+                                [&::-webkit-scrollbar-track]:bg-gray-100
+                                [&::-webkit-scrollbar-thumb]:bg-gray-300
+                                dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+                                dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+                    >
                         <Header />
                         <Content className="bg-gray-100 ">
                             <Outlet />

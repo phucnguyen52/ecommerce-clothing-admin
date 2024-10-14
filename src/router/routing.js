@@ -9,15 +9,20 @@ import Login from "../page/Auth/Login/Login";
 import Register from "../page/Auth/Register/Register";
 import AdminChat from "../page/Customer/AdminChat";
 import LogOut from "../page/Auth/LogOut/LogOut";
-import Customer from "../page/Customer/Customer";
-import Voucher from "../page/Product/Voucher";
-import CreateVoucher from "../page/Product/CreateVoucher";
+import ListUser from "../page/User/ListUser";
+import Voucher from "../page/Voucher/Voucher";
+import CreateVoucher from "../page/Voucher/CreateVoucher";
 import ListProduct from "../page/Product/ListProduct";
 import ListOrder from "../page/Order/ListOrder";
 import ProductDetail from "../page/Product/ProductDetail";
 import AddProduct from "../page/Product/AddProduct";
 import ListProvider from "../page/Provider/ListProvider";
-import RevenueChart from "../components/Charts/RevenueChart";
+import ListStore from "../page/Store/ListStore";
+import StoreReceipt from "../page/Store/StoreReceipt";
+import ListCategory from "../page/Category/ListCategory";
+import ReportCategory from "../page/Report/Category";
+import WarehouseProduct from "../page/WareHouse/WarehouseProduct";
+import ListEmployee from "../page/Employee/ListEmployee";
 const router = createBrowserRouter([
     {
         path: "/",
@@ -46,8 +51,8 @@ const router = createBrowserRouter([
                 element: <AdminChat />,
             },
             {
-                path: APP_ROUTER.CUSTOMER,
-                element: <Customer />,
+                path: APP_ROUTER.USER,
+                element: <ListUser />,
             },
             {
                 path: APP_ROUTER.VOUCHER,
@@ -77,9 +82,30 @@ const router = createBrowserRouter([
                 path: APP_ROUTER.LIST_PROVIDER,
                 element: <ListProvider />,
             },
+            
             {
-                path: APP_ROUTER.REVENUECHART,
-                element: <RevenueChart />,
+                path: APP_ROUTER.LIST_STORES,
+                element: <ListStore />,
+            },
+            {
+                path: APP_ROUTER.STORE_RECEIPT,
+                element: <StoreReceipt />,
+            },
+            {
+                path: APP_ROUTER.LIST_CATEGORY,
+                element: <ListCategory />,
+            },
+            {
+                path: APP_ROUTER.REPORT_CATEGORY,
+                element: <ReportCategory />,
+            },
+            {
+                path: APP_ROUTER.WAREHOUSE_PRODUCT,
+                element: <WarehouseProduct />,
+            },
+            {
+                path: APP_ROUTER.LIST_EMPLOYEE,
+                element: <ListEmployee />,
             },
         ],
     },

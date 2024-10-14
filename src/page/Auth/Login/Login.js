@@ -20,14 +20,14 @@ function Login() {
         if (validate()) {
             try {
                 const response = await axios.post(
-                    "http://localhost:8080/api/users/login",
+                    "http://localhost:8080/api/customer/login",
                     {
-                        Email: email,
-                        Password: password,
+                        email: email,
+                        password: password,
                     }
                 );
 
-                if (response && response.data && response.data.roleID === 1) {
+                if (response && response.data) {
                     Cookies.set("token", response.data.token);
                     toast.success("Đăng nhập thành công");
                     navigate("/home");

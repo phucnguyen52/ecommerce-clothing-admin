@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import ProductReviews from "../../components/Product/ProductReviews";
 import StarRating from "../../components/Product/StarRating";
-import { useParams } from "react-router-dom";
 import { HiArrowRight, HiArrowLeft } from "react-icons/hi";
 import { TbListDetails } from "react-icons/tb";
 import { MdOutlineEditNote } from "react-icons/md";
+import { useParams } from 'react-router-dom'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import {
@@ -37,7 +37,8 @@ const tailLayout = {
 };
 
 const ProductDetail = () => {
-    const id = 46;
+    const {id} = useParams();
+    console.log(id)
     const [data, setData] = useState();
     const [rating, setRating] = useState();
     const sizeDefault = ["S", "M", "L", "XL", "2XL", "3XL"];
@@ -62,7 +63,7 @@ const ProductDetail = () => {
     };
     const fetchAPI = async () => {
         try {
-            const req = await fetch(`http://localhost:8080/api/products/${id}`);
+            const req = await fetch(`http://localhost:8080/api/customer/product/${id}`);
             const res = await req.json();
             if (res.succes) {
                 setData(res.product);
@@ -79,10 +80,10 @@ const ProductDetail = () => {
         // fetchRating()
     }, []);
 
-    const checkSize = (variant) => {
-        const check = variant.filter((item) => item.size.trim() !== "").length;
-        return check ? true : false;
-    };
+    // const checkSize = (variant) => {
+    //     const check = variant.filter((item) => item.size.trim() !== "").length;
+    //     return check ? true : false;
+    // };
 
     function ButtonNext(props) {
         const { onClick } = props;
@@ -106,7 +107,7 @@ const ProductDetail = () => {
         customPaging: function (i) {
             return (
                 <a>
-                    <img src={`${JSON.parse(data.Image)[i]}`} alt="" />
+                    <img src={`${JSON.parse(data.image)[i]}`} alt="" />
                 </a>
             );
         },
@@ -254,7 +255,7 @@ const ProductDetail = () => {
                         <div className="relative mx-auto flex pl-14 my-4">
                             <div className="w-[35%] top-5 sticky">
                                 <Slider {...settings} className="w-full">
-                                    {JSON.parse(data.Image).map((item) => {
+                                    {JSON.parse(data.image).map((item) => {
                                         // console.log('img', item)
                                         return (
                                             <div key={item} className="w-full">
@@ -270,7 +271,7 @@ const ProductDetail = () => {
                             </div>
                             <div className="w-[65%] px-8">
                                 <div className="text-3xl font-bold">
-                                    {data.NameProducts}
+                                    {data.nameProduct}
                                 </div>
                                 <div className="my-8 flex items-end gap-2">
                                     {rating && (
@@ -295,22 +296,22 @@ const ProductDetail = () => {
                                         </>
                                     )}
                                     <div>
-                                        | Đã bán (web): {data.QuantitySell}
+                                        | Đã bán (web): {data.quantitySell}
                                     </div>
                                 </div>
                                 <div className="mb-5 flex gap-2 font-bold">
                                     <div className="text-2xl">
                                         {(
-                                            data.Price -
-                                            data.Price * data.Discount * 0.01
+                                            data.price -
+                                            data.price * data.discount * 0.01
                                         ).toFixed()}
                                         .000đ
                                     </div>
                                     <div className="text-2xl text-gray-400">
-                                        <del>{data.Price}.000đ</del>
+                                        <del>{data.price}.000đ</del>
                                     </div>
                                     <div className="text-xl text-red-600">
-                                        -{data.Discount}%
+                                        -{data.discount}%
                                     </div>
                                 </div>
 
@@ -318,7 +319,7 @@ const ProductDetail = () => {
                                     <div className="font-bold underline mb-4 text-lg">
                                         Số lượng trong kho:
                                     </div>
-                                    <Table
+                                    {/* <Table
                                         pagination={false}
                                         columns={
                                             checkSize(data.VariantProducts)
@@ -393,7 +394,7 @@ const ProductDetail = () => {
                                                       })
                                                   ))
                                         }
-                                    />
+                                    /> */}
                                 </div>
 
                                 <div className="border-t">
@@ -401,7 +402,7 @@ const ProductDetail = () => {
                                         Đặc điểm nổi bật
                                     </div>
                                     <div>
-                                        {data.DescriptionProducts.split(
+                                        {data.descriptionProducts.split(
                                             /\\\\/
                                         ).map((item, index) => (
                                             <div
@@ -430,239 +431,243 @@ const ProductDetail = () => {
                     </>
                 )}
             </div>
-            {open && data && (
-                <div className="flex gap-3 items-center justify-center my-4">
-                    <MdOutlineEditNote className="w-7 h-7" />
-                    <div className="text-3xl text-gray-900 dark:text-white font-bold">
-                        CẬP NHẬT SẢN PHẨM
+            <div className="w-[70%] mx-auto">
+                {open && data && (
+                    <div className="flex gap-3 items-center justify-center my-4">
+                        <MdOutlineEditNote className="w-7 h-7" />
+                        <div className="text-3xl text-gray-900 dark:text-white font-bold">
+                            CẬP NHẬT SẢN PHẨM
+                        </div>
                     </div>
-                </div>
-            )}
-            {open && data && (
-                <Form
-                    labelAlign="left"
-                    form={form}
-                    {...layout}
-                    name="update-product"
-                    initialValues={{
-                        CategorySubId: data.CategorySubId,
-                        CollectionID: data.Collections.map((item) => item.id),
-                        DescriptionProducts: data.DescriptionProducts.replace(
-                            /\\\\/g,
-                            "\n"
-                        ),
-                        Discount: data.Discount,
-                        NeedID: data.Needs.map((item) => item.id),
-                        Price: data.Price,
-                        NameProducts: data.NameProducts,
-                        // Image: imageUrl
-                    }}
-                    onFinish={onFinish}
-                    onFinishFailed={onFinishFailed}
-                >
-                    <Form.Item
-                        name="NameProducts"
-                        label={
-                            <span className="text-slate-600 text-base">
-                                Tên sản phẩm
-                            </span>
-                        }
-                        rules={[{ required: true }]}
+                )}
+                {open && data && (
+                    <Form
+                        labelAlign="left"
+                        form={form}
+                        {...layout}
+                        name="update-product"
+                        initialValues={{
+                            CategorySubId: data.CategorySubId,
+                            CollectionID: data.Collections.map(
+                                (item) => item.id
+                            ),
+                            DescriptionProducts:
+                                data.DescriptionProducts.replace(/\\\\/g, "\n"),
+                            Discount: data.Discount,
+                            NeedID: data.Needs.map((item) => item.id),
+                            Price: data.Price,
+                            NameProducts: data.NameProducts,
+                            // Image: imageUrl
+                        }}
+                        onFinish={onFinish}
+                        onFinishFailed={onFinishFailed}
                     >
-                        <Input />
-                    </Form.Item>
-
-                    <Form.Item
-                        name="DescriptionProducts"
-                        label={
-                            <span className="text-slate-600 text-base">
-                                Mô tả
-                            </span>
-                        }
-                        rules={[{ required: true }]}
-                    >
-                        <Input.TextArea rows={6} />
-                    </Form.Item>
-
-                    <Form.Item
-                        label={
-                            <span className="text-slate-600 text-base">
-                                Giá
-                            </span>
-                        }
-                        name="Price"
-                        rules={[{ required: true }]}
-                    >
-                        <InputNumber
-                            min={1}
-                            max={1000}
-                            style={{
-                                width: "50%",
-                            }}
-                            suffix=".000 VNĐ"
-                        />
-                    </Form.Item>
-
-                    <Form.Item
-                        label={
-                            <span className="text-slate-600 text-base">
-                                Giảm giá
-                            </span>
-                        }
-                        name="Discount"
-                    >
-                        <InputNumber
-                            min={0}
-                            max={100}
-                            style={{
-                                width: "50%",
-                            }}
-                            suffix="%"
-                        />
-                    </Form.Item>
-
-                    {categorySub && categorySub.data && (
                         <Form.Item
-                            name="CategorySubId"
+                            name="NameProducts"
                             label={
                                 <span className="text-slate-600 text-base">
-                                    Loại sản phẩm
+                                    Tên sản phẩm
                                 </span>
                             }
                             rules={[{ required: true }]}
                         >
-                            <Select placeholder="Chọn loại sản phẩm">
-                                {categorySub.data.map((item, index) => {
-                                    return (
-                                        <Option key={index} value={item.id}>
-                                            {item.Name}
-                                        </Option>
-                                    );
-                                })}
-                            </Select>
+                            <Input />
                         </Form.Item>
-                    )}
 
-                    {need && need.needs && (
+                        <Form.Item
+                            name="DescriptionProducts"
+                            label={
+                                <span className="text-slate-600 text-base">
+                                    Mô tả
+                                </span>
+                            }
+                            rules={[{ required: true }]}
+                        >
+                            <Input.TextArea rows={6} />
+                        </Form.Item>
+
                         <Form.Item
                             label={
                                 <span className="text-slate-600 text-base">
-                                    Nhu cầu
+                                    Giá
                                 </span>
                             }
-                            name="NeedID"
+                            name="Price"
                             rules={[{ required: true }]}
                         >
-                            <Checkbox.Group className="w-full">
-                                <Row>
-                                    {need.needs.map((item, index) => {
+                            <InputNumber
+                                min={1}
+                                max={1000}
+                                style={{
+                                    width: "50%",
+                                }}
+                                suffix=".000 VNĐ"
+                            />
+                        </Form.Item>
+
+                        <Form.Item
+                            label={
+                                <span className="text-slate-600 text-base">
+                                    Giảm giá
+                                </span>
+                            }
+                            name="Discount"
+                        >
+                            <InputNumber
+                                min={0}
+                                max={100}
+                                style={{
+                                    width: "50%",
+                                }}
+                                suffix="%"
+                            />
+                        </Form.Item>
+
+                        {categorySub && categorySub.data && (
+                            <Form.Item
+                                name="CategorySubId"
+                                label={
+                                    <span className="text-slate-600 text-base">
+                                        Loại sản phẩm
+                                    </span>
+                                }
+                                rules={[{ required: true }]}
+                            >
+                                <Select placeholder="Chọn loại sản phẩm">
+                                    {categorySub.data.map((item, index) => {
                                         return (
-                                            <Col span={6} key={index}>
-                                                <Checkbox
-                                                    value={item.id}
-                                                    style={{
-                                                        lineHeight: "32px",
-                                                    }}
-                                                >
-                                                    {item.NeedName}
-                                                </Checkbox>
-                                            </Col>
+                                            <Option key={index} value={item.id}>
+                                                {item.Name}
+                                            </Option>
                                         );
                                     })}
-                                </Row>
-                            </Checkbox.Group>
-                        </Form.Item>
-                    )}
+                                </Select>
+                            </Form.Item>
+                        )}
 
-                    {collection && collection.collection && (
-                        <Form.Item
-                            label={
-                                <span className="text-slate-600 text-base">
-                                    Bộ sưu tập
-                                </span>
-                            }
-                            name="CollectionID"
-                            rules={[{ required: true }]}
-                        >
-                            <Checkbox.Group>
-                                <Row>
-                                    {collection.collection.map(
-                                        (item, index) => {
+                        {need && need.needs && (
+                            <Form.Item
+                                label={
+                                    <span className="text-slate-600 text-base">
+                                        Nhu cầu
+                                    </span>
+                                }
+                                name="NeedID"
+                                rules={[{ required: true }]}
+                            >
+                                <Checkbox.Group className="w-full">
+                                    <Row>
+                                        {need.needs.map((item, index) => {
                                             return (
-                                                <Col span={8} key={index}>
+                                                <Col span={6} key={index}>
                                                     <Checkbox
                                                         value={item.id}
-                                                        style={{
-                                                            lineHeight: "32px",
-                                                        }}
+                                                        
+                                                        className="leading-4 text-nowrap"
                                                     >
-                                                        {item.Name}
+                                                        {item.NeedName}
                                                     </Checkbox>
                                                 </Col>
                                             );
-                                        }
-                                    )}
-                                </Row>
-                            </Checkbox.Group>
-                        </Form.Item>
-                    )}
+                                        })}
+                                    </Row>
+                                </Checkbox.Group>
+                            </Form.Item>
+                        )}
 
-                    <Form.Item>
-                        <Upload
-                            beforeUpload={handleBeforeUpload}
-                            showUploadList={false} // Ẩn danh sách tệp đã chọn
-                        >
-                            <Button
-                                icon={<UploadOutlined />}
-                                loading={isLoading}
+                        {collection && collection.collection && (
+                            <Form.Item
+                                label={
+                                    <span className="text-slate-600 text-base">
+                                        Bộ sưu tập
+                                    </span>
+                                }
+                                name="CollectionID"
+                                rules={[{ required: true }]}
                             >
-                                Choose File
-                            </Button>
-                        </Upload>
-                    </Form.Item>
-                    {imageUrl && (
-                        <div>
-                            <p>Image URL:</p>
-                            <div className="flex gap-4 my-4">
-                                {imageUrl.map((item) => {
-                                    return (
-                                        <div
-                                            key={item}
-                                            className="w-[150px] h-[200px] relative"
-                                        >
-                                            <img
-                                                src={item}
-                                                alt="Uploaded"
-                                                className="w-full h-full object-cover rounded-md"
-                                            />
-                                            <div
-                                                onClick={() => DeleteImg(item)}
-                                                className="absolute top-0 right-1.5 cursor-pointer"
-                                            >
-                                                <CloseOutlined />
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </div>
-                    )}
+                                <Checkbox.Group>
+                                    <Row>
+                                        {collection.collection.map(
+                                            (item, index) => {
+                                                return (
+                                                    <Col span={8} key={index}>
+                                                        <Checkbox
+                                                            value={item.id}
+                                                            style={{
+                                                                lineHeight:
+                                                                    "32px",
+                                                            }}
+                                                        >
+                                                            {item.Name}
+                                                        </Checkbox>
+                                                    </Col>
+                                                );
+                                            }
+                                        )}
+                                    </Row>
+                                </Checkbox.Group>
+                            </Form.Item>
+                        )}
 
-                    <Form.Item className="mb-0">
-                        <Button
-                            type="primary"
-                            htmlType="submit"
-                            loading={isLoading}
-                            className="mr-4 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                        >
-                            Cập nhật
-                        </Button>
-                        <Button className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">
-                            Cancel
-                        </Button>
-                    </Form.Item>
-                </Form>
-            )}
+                        <Form.Item>
+                            <Upload
+                                beforeUpload={handleBeforeUpload}
+                                showUploadList={false} // Ẩn danh sách tệp đã chọn
+                            >
+                                <Button
+                                    icon={<UploadOutlined />}
+                                    loading={isLoading}
+                                >
+                                    Choose File
+                                </Button>
+                            </Upload>
+                        </Form.Item>
+                        {imageUrl && (
+                            <div>
+                                <p>Image URL:</p>
+                                <div className="flex gap-4 my-4">
+                                    {imageUrl.map((item) => {
+                                        return (
+                                            <div
+                                                key={item}
+                                                className="w-[150px] h-[200px] relative"
+                                            >
+                                                <img
+                                                    src={item}
+                                                    alt="Uploaded"
+                                                    className="w-full h-full object-cover rounded-md"
+                                                />
+                                                <div
+                                                    onClick={() =>
+                                                        DeleteImg(item)
+                                                    }
+                                                    className="absolute top-0 right-1.5 cursor-pointer"
+                                                >
+                                                    <CloseOutlined />
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        )}
+
+                        <Form.Item className="mb-0">
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                loading={isLoading}
+                                className="mr-4 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                            >
+                                Cập nhật
+                            </Button>
+                            <Button className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">
+                                Cancel
+                            </Button>
+                        </Form.Item>
+                    </Form>
+                )}
+            </div>
         </div>
     );
 };
