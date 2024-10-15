@@ -1,73 +1,59 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
-import ProductReviews from "../../components/Product/ProductReviews";
 import StarRating from "../../components/Product/StarRating";
 import { HiArrowRight, HiArrowLeft } from "react-icons/hi";
 import { TbListDetails } from "react-icons/tb";
-import { MdOutlineEditNote } from "react-icons/md";
 import { useParams } from 'react-router-dom'
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import {
-    Table,
-    Button,
-    Checkbox,
-    Col,
-    Form,
-    Input,
-    InputNumber,
-    Row,
-    Select,
-    Upload,
-} from "antd";
+import {Table, Button, Col, Form, Input, InputNumber, Row, Select, Upload, Modal, } from "antd";
 import { UploadOutlined, CloseOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
 import "../Product/index.css";
+import ModalProduct from "../../components/Product/ModalProduct";
 const { Option } = Select;
-const layout = {
-    labelCol: {
-        span: 8,
-    },
-    wrapperCol: {
-        span: 16,
-    },
-};
-const tailLayout = {
-    wrapperCol: { offset: 4, span: 16 },
-};
 
 const ProductDetail = () => {
-    const {id} = useParams();
-    console.log(id)
+    const { id } = useParams();
     const [data, setData] = useState();
     const [rating, setRating] = useState();
     const sizeDefault = ["S", "M", "L", "XL", "2XL", "3XL"];
+    const [form] = Form.useForm();
+    const [category, setCategory] = useState();
+    const [imageUrl, setImageUrl] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [open, setOpen] = useState(false);
 
     const fetchRating = async () => {
         try {
-            const req = await fetch(
-                `http://localhost:8080/api/products/${id}/ratings`
-            );
+            const req = await fetch(`http://localhost:8080/api/customer/rating/${id}`);
             const res = await req.json();
             if (res.succes) {
-                const count = res.rating.count;
-                const total = res.rating.totalStartPoint;
+                const count = res.rating[0].totalRecords;
+                const total = +res.rating[0].totalStars;
                 setRating({
                     count: count,
                     point: count !== 0 ? (total / count).toFixed(2) : 0,
                 });
-            } else console.log("Không lấy được biến thể");
+            } else console.log("không lấy được rating");
         } catch (error) {
-            console.log("Error get variantproduct", error);
+            console.log("Error get rating", error);
         }
     };
-    const fetchAPI = async () => {
+    const fetchProduct = async () => {
         try {
-            const req = await fetch(`http://localhost:8080/api/customer/product/${id}`);
-            const res = await req.json();
-            if (res.succes) {
-                setData(res.product);
-                console.log("res", res.product);
+            const req1 = await fetch(`http://localhost:8080/api/customer/product/${id}`);
+            const res1 = await req1.json();
+            const req2 = await fetch(`http://localhost:8080/api/customer/product/${id}/detail`)
+            const res2 = await req2.json()
+            if (res1.succes && res2.succes) {
+                const checkSize = !(res2.product.every(i => i.size.trim() === ''))
+                setData({
+                    ...res1.product,
+                    VariantProducts: res2.product,
+                    isSize: checkSize
+                });
+                setImageUrl(JSON.parse(res1.product.image))
             } else {
                 console.error("ProductDetail: failed");
             }
@@ -75,16 +61,24 @@ const ProductDetail = () => {
             console.error("Promise productdetail rejected");
         }
     };
+    const fetchCategory = async () => {
+        try {
+            const req = await fetch(`http://localhost:8080/api/admin/category`);
+            const res = await req.json();
+            if (res.succes) setCategory(res.category)
+            else console.log("fetchCategory succes: false")
+        } catch (error) {
+            console.log("fail fetchCategory")
+        }
+    };
     useEffect(() => {
-        fetchAPI();
-        // fetchRating()
+        fetchProduct()
+        fetchRating()
+        fetchCategory()
     }, []);
 
-    // const checkSize = (variant) => {
-    //     const check = variant.filter((item) => item.size.trim() !== "").length;
-    //     return check ? true : false;
-    // };
 
+    //Image
     function ButtonNext(props) {
         const { onClick } = props;
         return (
@@ -129,33 +123,6 @@ const ProductDetail = () => {
         prevArrow: <ButtonPrev />,
     };
 
-    const handleRating = (value) => {
-        setRating(value);
-    };
-
-    //
-    const [form] = Form.useForm();
-    const [need, setNeed] = useState();
-    const [collection, setCollection] = useState();
-    const [categorySub, setCategorySub] = useState();
-    const [imageUrl, setImageUrl] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [open, setOpen] = useState(false);
-    const fetchapi = async (type) => {
-        const req = await fetch(`http://localhost:8080/api/${type}`);
-        const res = await req.json();
-        // console.log(res);
-        return res;
-    };
-    useEffect(() => {
-        const set = async () => {
-            setNeed(await fetchapi("need"));
-            setCollection(await fetchapi("collection"));
-            setCategorySub(await fetchapi("categorysub"));
-        };
-        set();
-    }, []);
-
     const charUpperCase = (sentence) => {
         sentence = sentence.toLowerCase();
         let words = sentence.split(" ");
@@ -174,22 +141,20 @@ const ProductDetail = () => {
             return 0;
         }
         const product = {
-            CategorySubId: values.CategorySubId,
-            CollectionID: values.CollectionID,
-            DescriptionProducts:
-                values.DescriptionProducts.split("\n").join("\u005C\u005C"),
-            Discount: values.Discount,
-            NeedID: values.NeedID,
-            Price: values.Price,
-            NameProducts: charUpperCase(values.NameProducts),
-            Image: imageUrl,
+            CategoryId: values.CategoryId,
+            brand: values.brand,
+            descriptionProducts: values.descriptionProducts.split("\n").join("\u005C\u005C"),
+            discount: values.discount,
+            price: values.price,
+            nameProduct: charUpperCase(values.nameProduct),
+            image: imageUrl,
         };
         console.log("product", product);
 
         console.log("values", values);
         try {
-            const req = await fetch(`http://localhost:8080/api/products`, {
-                method: "POST",
+            const req = await fetch(`http://localhost:8080/api/admin/product/${id}`, {
+                method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -199,10 +164,10 @@ const ProductDetail = () => {
             const res = await req.json();
             console.log(res);
             if (res.succes === true) {
-                toast.success("Thêm sản phẩm thành công");
+                toast.success("Cập nhật sản phẩm thành công");
             } else toast.error("Tên sản phẩm đã tồn tại");
         } catch (error) {
-            console.error("Error adding product:", error.message);
+            console.error("Error update product:", error.message);
             throw error;
         }
         onReset();
@@ -212,7 +177,7 @@ const ProductDetail = () => {
     };
     const onReset = () => {
         form.resetFields();
-        setImageUrl([]);
+        setImageUrl(JSON.parse(data.image));
     };
     const DeleteImg = (img) => {
         const image = imageUrl.filter((item) => item !== img);
@@ -236,8 +201,6 @@ const ProductDetail = () => {
         } catch (error) {
             console.error("Error uploading images:", error);
         }
-
-        // Ngăn chặn quá trình tải lên mặc định của Upload
         return false;
     };
     return (
@@ -245,7 +208,16 @@ const ProductDetail = () => {
             <div>
                 {data && (
                     <>
-                        <div className="flex gap-3 items-center justify-center mb-3">
+                    <div className="float-right">
+                            <button
+                                type="button"
+                                onClick={() => setOpen(!open)}
+                                className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
+                            >
+                                Chỉnh sửa
+                            </button>
+                        </div>
+                        <div className="flex gap-3 items-center justify-center mb-10">
                             <TbListDetails className="w-7 h-7" />
                             <div className="text-3xl text-gray-900 dark:text-white font-bold">
                                 CHI TIẾT SẢN PHẨM
@@ -256,7 +228,6 @@ const ProductDetail = () => {
                             <div className="w-[35%] top-5 sticky">
                                 <Slider {...settings} className="w-full">
                                     {JSON.parse(data.image).map((item) => {
-                                        // console.log('img', item)
                                         return (
                                             <div key={item} className="w-full">
                                                 <img
@@ -270,10 +241,10 @@ const ProductDetail = () => {
                                 </Slider>
                             </div>
                             <div className="w-[65%] px-8">
-                                <div className="text-3xl font-bold">
+                                <div className="text-xl font-bold">
                                     {data.nameProduct}
                                 </div>
-                                <div className="my-8 flex items-end gap-2">
+                                <div className="my-8 flex items-center gap-2">
                                     {rating && (
                                         <>
                                             {rating.count ? (
@@ -282,8 +253,8 @@ const ProductDetail = () => {
                                                         {rating.point}
                                                     </div>
                                                     <StarRating
-                                                        className="text-4xl"
-                                                        css="text-blue-800 w-5 h-5"
+                                                        className="text-xl"
+                                                        css="text-blue-800 w-3 h-3"
                                                         rating={rating.point}
                                                     />
                                                     <div>({rating.count})</div>
@@ -299,18 +270,18 @@ const ProductDetail = () => {
                                         | Đã bán (web): {data.quantitySell}
                                     </div>
                                 </div>
-                                <div className="mb-5 flex gap-2 font-bold">
-                                    <div className="text-2xl">
+                                <div className="mb-5 flex gap-2 font-bold text-xl">
+                                    <div>
                                         {(
                                             data.price -
                                             data.price * data.discount * 0.01
                                         ).toFixed()}
                                         .000đ
                                     </div>
-                                    <div className="text-2xl text-gray-400">
+                                    <div className="text-gray-400">
                                         <del>{data.price}.000đ</del>
                                     </div>
-                                    <div className="text-xl text-red-600">
+                                    <div className="text-lg text-red-600">
                                         -{data.discount}%
                                     </div>
                                 </div>
@@ -319,82 +290,82 @@ const ProductDetail = () => {
                                     <div className="font-bold underline mb-4 text-lg">
                                         Số lượng trong kho:
                                     </div>
-                                    {/* <Table
+                                    <Table
                                         pagination={false}
                                         columns={
-                                            checkSize(data.VariantProducts)
+                                            data?.isSize
                                                 ? [
-                                                      {
-                                                          title: "Màu/Size",
-                                                          dataIndex: "color",
-                                                          rowScope: "row",
-                                                          key: "color",
-                                                      },
-                                                      ...sizeDefault.map(
-                                                          (item) => ({
-                                                              title: item,
-                                                              dataIndex: item,
-                                                              key: item,
-                                                          })
-                                                      ),
-                                                  ]
+                                                    {
+                                                        title: "Màu/Size",
+                                                        dataIndex: "color",
+                                                        rowScope: "row",
+                                                        key: "color",
+                                                    },
+                                                    ...sizeDefault.map(
+                                                        (item) => ({
+                                                            title: item,
+                                                            dataIndex: item,
+                                                            key: item,
+                                                        })
+                                                    ),
+                                                ]
                                                 : [
-                                                      {
-                                                          title: "Màu",
-                                                          dataIndex: "color",
-                                                          rowScope: "row",
-                                                          key: "color",
-                                                      },
-                                                      {
-                                                          title: "Số lượng",
-                                                          dataIndex: "quantity",
-                                                          key: "quantity",
-                                                      },
-                                                  ]
+                                                    {
+                                                        title: "Màu",
+                                                        dataIndex: "color",
+                                                        rowScope: "row",
+                                                        key: "color",
+                                                    },
+                                                    {
+                                                        title: "Số lượng",
+                                                        dataIndex: "quantity",
+                                                        key: "quantity",
+                                                    },
+                                                ]
                                         }
                                         dataSource={
                                             data &&
-                                            (checkSize(data.VariantProducts)
+                                            (data?.isSize
                                                 ? [
-                                                      ...new Set(
-                                                          data.VariantProducts.map(
-                                                              (item) =>
-                                                                  item.color
-                                                          )
-                                                      ),
-                                                  ].map((item, index) => ({
-                                                      key: index,
-                                                      color: item,
-                                                      ...sizeDefault.reduce(
-                                                          (acc, i) => {
-                                                              const variant =
-                                                                  data.VariantProducts.filter(
-                                                                      (a) =>
-                                                                          a.color ===
-                                                                              item &&
-                                                                          a.size ===
-                                                                              i
-                                                                  );
-                                                              acc[i] =
-                                                                  variant.length
-                                                                      ? variant[0]
-                                                                            .quantity
-                                                                      : "-";
-                                                              return acc;
-                                                          },
-                                                          {}
-                                                      ),
-                                                  }))
+                                                    ...new Set(
+                                                        data.VariantProducts.map(
+                                                            (item) =>
+                                                                item.color
+                                                        )
+                                                    ),
+                                                ].map((item, index) => ({
+                                                    key: index,
+                                                    color: item,
+                                                    ...sizeDefault.reduce(
+                                                        (acc, i) => {
+                                                            const variant =
+                                                                data.VariantProducts.filter(
+                                                                    (a) =>
+                                                                        a.color ===
+                                                                        item &&
+                                                                        a.size ===
+                                                                        i
+                                                                );
+                                                            acc[i] =
+                                                                variant.length
+                                                                    ? variant[0]
+                                                                        .quantity
+                                                                    : "-";
+                                                            return acc;
+                                                        },
+                                                        {}
+                                                    ),
+                                                }))
                                                 : data.VariantProducts.map(
-                                                      (item, index) => ({
-                                                          key: index,
-                                                          color: item.color,
-                                                          quantity:
-                                                              item.quantity,
-                                                      })
-                                                  ))
+                                                    (item, index) => ({
+                                                        key: index,
+                                                        color: item.color,
+                                                        quantity:
+                                                            item.quantity,
+                                                    })
+                                                ))
                                         }
-                                    /> */}
+                                    />
                                 </div>
 
                                 <div className="border-t">
@@ -417,257 +388,229 @@ const ProductDetail = () => {
                                 </div>
                             </div>
                         </div>
-
-                        <ProductReviews id={id} onHandleRating={handleRating} />
-                        <div className="flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => setOpen(!open)}
-                                className="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700"
-                            >
-                                {open ? "Đóng" : "Chỉnh sửa"}
-                            </button>
-                        </div>
                     </>
                 )}
             </div>
-            <div className="w-[70%] mx-auto">
-                {open && data && (
-                    <div className="flex gap-3 items-center justify-center my-4">
-                        <MdOutlineEditNote className="w-7 h-7" />
-                        <div className="text-3xl text-gray-900 dark:text-white font-bold">
-                            CẬP NHẬT SẢN PHẨM
-                        </div>
-                    </div>
-                )}
-                {open && data && (
-                    <Form
-                        labelAlign="left"
-                        form={form}
-                        {...layout}
-                        name="update-product"
-                        initialValues={{
-                            CategorySubId: data.CategorySubId,
-                            CollectionID: data.Collections.map(
-                                (item) => item.id
-                            ),
-                            DescriptionProducts:
-                                data.DescriptionProducts.replace(/\\\\/g, "\n"),
-                            Discount: data.Discount,
-                            NeedID: data.Needs.map((item) => item.id),
-                            Price: data.Price,
-                            NameProducts: data.NameProducts,
-                            // Image: imageUrl
-                        }}
-                        onFinish={onFinish}
-                        onFinishFailed={onFinishFailed}
-                    >
-                        <Form.Item
-                            name="NameProducts"
-                            label={
-                                <span className="text-slate-600 text-base">
-                                    Tên sản phẩm
-                                </span>
-                            }
-                            rules={[{ required: true }]}
-                        >
-                            <Input />
-                        </Form.Item>
 
-                        <Form.Item
-                            name="DescriptionProducts"
-                            label={
-                                <span className="text-slate-600 text-base">
-                                    Mô tả
-                                </span>
-                            }
-                            rules={[{ required: true }]}
-                        >
-                            <Input.TextArea rows={6} />
-                        </Form.Item>
+            {/* update */}
+            {data && (
+                // <Modal
+                //     title={
+                //         <div className="text-center text-2xl font-bold mb-8">
+                //             CẬP NHẬT SẢN PHẨM
+                //         </div>
+                //     }
+                //     open={open}
+                //     onCancel={() => setOpen(false)}
+                //     style={{ top: 10 }}
+                //     footer={null} // Không hiển thị footer mặc định của modal
+                //     width={1000}
+                // >
+                //     <Form
+                //         labelAlign="left"
+                //         form={form}
+                //         labelCol={{
+                //             span: 7,
+                //         }}
+                //         // size="small"
+                //         name="update-product"
+                //         initialValues={{
+                //             CategoryId: data.CategoryId,
+                //             brand: data.brand,
+                //             descriptionProducts: data.descriptionProducts.replace(/\\\\/g, "\n"),
+                //             discount: data.discount,
+                //             price: data.price,
+                //             nameProduct: data.nameProduct,
+                //         }}
+                //         onFinish={onFinish}
+                //         onFinishFailed={onFinishFailed}
+                //     >
+                //         <Row gutter={[16,0]}>
+                //             <Col span={12}>
+                //             <Form.Item
+                //             style={{marginBottom: 10}}
+                //                 name="nameProduct"
+                //                 label={
+                //                     <span className="text-slate-600 text-base">
+                //                         Tên sản phẩm
+                //                     </span>
+                //                 }
+                //                 rules={[{ required: true }]}
+                //             >
+                //                 <Input />
+                //             </Form.Item>
+                //             </Col>
+                //             <Col span={12}>
+                //             <Form.Item
+                //             style={{marginBottom: 10}}
+                //                 name="brand"
+                //                 label={
+                //                     <span className="text-slate-600 text-base">
+                //                         Loại
+                //                     </span>
+                //                 }
+                //                 rules={[{ required: true }]}
+                //             >
+                //                 <Input />
+                //             </Form.Item>
+                //             </Col>
+                            
+                //         </Row>
 
-                        <Form.Item
-                            label={
-                                <span className="text-slate-600 text-base">
-                                    Giá
-                                </span>
-                            }
-                            name="Price"
-                            rules={[{ required: true }]}
-                        >
-                            <InputNumber
-                                min={1}
-                                max={1000}
-                                style={{
-                                    width: "50%",
-                                }}
-                                suffix=".000 VNĐ"
-                            />
-                        </Form.Item>
+                //         <Row gutter={[16,0]}>
+                //             <Col span={12}>
+                //                 <Form.Item
+                //                 style={{marginBottom: 10}}
+                //                     name="descriptionProducts"
+                //                     label={
+                //                         <span className="text-slate-600 text-base">
+                //                             Mô tả
+                //                         </span>
+                //                     }
+                //                     rules={[{ required: true }]}
+                //                 >
+                //                     <Input.TextArea rows={6} />
+                //                 </Form.Item>
+                //             </Col>
+                //             <Col span={12}>
+                //             {category && (
+                //                     <Form.Item
+                //                     style={{marginBottom: 10}}
+                //                         name="CategoryId"
+                //                         label={
+                //                             <span className="text-slate-600 text-base">
+                //                                 Loại sản phẩm
+                //                             </span>
+                //                         }
+                //                         rules={[{ required: true }]}
+                //                     >
+                //                         <Select placeholder="Chọn loại sản phẩm">
+                //                             {category.map((item, index) => {
+                //                                 return (
+                //                                     <Option key={index} value={item.id}>
+                //                                         {item.categoryName}
+                //                                     </Option>
+                //                                 );
+                //                             })}
+                //                         </Select>
+                //                     </Form.Item>
+                //                 )}
+                //                 <Form.Item
+                //                     label={
+                //                         <span className="text-slate-600 text-base">
+                //                             Giá
+                //                         </span>
+                //                     }
+                //                     style={{marginBottom: 10}}
+                //                     name="price"
+                //                     rules={[{ required: true }]}
+                //                 >
+                //                     <InputNumber
+                //                         min={1}
+                //                         max={1000}
+                //                         style={{
+                //                             width: "100%",
+                //                         }}
+                //                         suffix=".000 VNĐ"
+                //                     />
+                //                 </Form.Item>
+                //                 <Form.Item
+                //                     label={
+                //                         <span className="text-slate-600 text-base">
+                //                             Giảm giá
+                //                         </span>
+                //                     }
+                //                     style={{marginBottom: 10}}
+                //                     name="discount"
+                //                 >
+                //                     <InputNumber
+                //                         min={0}
+                //                         max={100}
+                //                         style={{
+                //                             width: "100%",
+                //                         }}
+                //                         suffix="%"
+                //                     />
+                //                 </Form.Item>
+                //             </Col>
+                //         </Row>
+                        
+                //         <Row gutter={[0,0]}>
+                //         <Col flex="auto">
+                //         <Form.Item
+                //             label={
+                //                 <span className="text-slate-600 text-base">
+                //                     Ảnh
+                //                 </span>
+                //             }
+                //             style={{margin: 0}}
+                //             >  
+                //             </Form.Item>
+                //             </Col>
+                //             <Upload
+                //                     beforeUpload={handleBeforeUpload}
+                //                     showUploadList={false} // Ẩn danh sách tệp đã chọn
+                //                 >
+                //                     <Button
+                //                         icon={<UploadOutlined />}
+                //                         loading={isLoading}
+                //                     >
+                //                         Choose File
+                //                     </Button>
+                //                 </Upload>
+                //                 </Row> 
+                            
 
-                        <Form.Item
-                            label={
-                                <span className="text-slate-600 text-base">
-                                    Giảm giá
-                                </span>
-                            }
-                            name="Discount"
-                        >
-                            <InputNumber
-                                min={0}
-                                max={100}
-                                style={{
-                                    width: "50%",
-                                }}
-                                suffix="%"
-                            />
-                        </Form.Item>
+                //         {imageUrl && (
+                //             <div>
+                //                 <div className="flex gap-4 my-2">
+                //                     {imageUrl.map((item) => {
+                //                         console.log("image", item)
+                //                         return (
+                //                             <div
+                //                                 key={item}
+                //                                 className="w-[150px] h-[200px] relative"
+                //                             >
+                //                                 <img
+                //                                     src={item}
+                //                                     alt="Uploaded"
+                //                                     className="w-full h-full object-cover rounded-md"
+                //                                 />
+                //                                 <div
+                //                                     onClick={() =>
+                //                                         DeleteImg(item)
+                //                                     }
+                //                                     className="absolute top-0 right-1.5 cursor-pointer"
+                //                                 >
+                //                                     <CloseOutlined />
+                //                                 </div>
+                //                             </div>
+                //                         );
+                //                     })}
+                //                 </div>
+                //             </div>
+                //         )}
 
-                        {categorySub && categorySub.data && (
-                            <Form.Item
-                                name="CategorySubId"
-                                label={
-                                    <span className="text-slate-600 text-base">
-                                        Loại sản phẩm
-                                    </span>
-                                }
-                                rules={[{ required: true }]}
-                            >
-                                <Select placeholder="Chọn loại sản phẩm">
-                                    {categorySub.data.map((item, index) => {
-                                        return (
-                                            <Option key={index} value={item.id}>
-                                                {item.Name}
-                                            </Option>
-                                        );
-                                    })}
-                                </Select>
-                            </Form.Item>
-                        )}
-
-                        {need && need.needs && (
-                            <Form.Item
-                                label={
-                                    <span className="text-slate-600 text-base">
-                                        Nhu cầu
-                                    </span>
-                                }
-                                name="NeedID"
-                                rules={[{ required: true }]}
-                            >
-                                <Checkbox.Group className="w-full">
-                                    <Row>
-                                        {need.needs.map((item, index) => {
-                                            return (
-                                                <Col span={6} key={index}>
-                                                    <Checkbox
-                                                        value={item.id}
-                                                        
-                                                        className="leading-4 text-nowrap"
-                                                    >
-                                                        {item.NeedName}
-                                                    </Checkbox>
-                                                </Col>
-                                            );
-                                        })}
-                                    </Row>
-                                </Checkbox.Group>
-                            </Form.Item>
-                        )}
-
-                        {collection && collection.collection && (
-                            <Form.Item
-                                label={
-                                    <span className="text-slate-600 text-base">
-                                        Bộ sưu tập
-                                    </span>
-                                }
-                                name="CollectionID"
-                                rules={[{ required: true }]}
-                            >
-                                <Checkbox.Group>
-                                    <Row>
-                                        {collection.collection.map(
-                                            (item, index) => {
-                                                return (
-                                                    <Col span={8} key={index}>
-                                                        <Checkbox
-                                                            value={item.id}
-                                                            style={{
-                                                                lineHeight:
-                                                                    "32px",
-                                                            }}
-                                                        >
-                                                            {item.Name}
-                                                        </Checkbox>
-                                                    </Col>
-                                                );
-                                            }
-                                        )}
-                                    </Row>
-                                </Checkbox.Group>
-                            </Form.Item>
-                        )}
-
-                        <Form.Item>
-                            <Upload
-                                beforeUpload={handleBeforeUpload}
-                                showUploadList={false} // Ẩn danh sách tệp đã chọn
-                            >
-                                <Button
-                                    icon={<UploadOutlined />}
-                                    loading={isLoading}
-                                >
-                                    Choose File
-                                </Button>
-                            </Upload>
-                        </Form.Item>
-                        {imageUrl && (
-                            <div>
-                                <p>Image URL:</p>
-                                <div className="flex gap-4 my-4">
-                                    {imageUrl.map((item) => {
-                                        return (
-                                            <div
-                                                key={item}
-                                                className="w-[150px] h-[200px] relative"
-                                            >
-                                                <img
-                                                    src={item}
-                                                    alt="Uploaded"
-                                                    className="w-full h-full object-cover rounded-md"
-                                                />
-                                                <div
-                                                    onClick={() =>
-                                                        DeleteImg(item)
-                                                    }
-                                                    className="absolute top-0 right-1.5 cursor-pointer"
-                                                >
-                                                    <CloseOutlined />
-                                                </div>
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-                        )}
-
-                        <Form.Item className="mb-0">
-                            <Button
-                                type="primary"
-                                htmlType="submit"
-                                loading={isLoading}
-                                className="mr-4 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                            >
-                                Cập nhật
-                            </Button>
-                            <Button className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800">
-                                Cancel
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                )}
-            </div>
+                //         <Form.Item className="mb-0 flex justify-end">
+                //             <Button
+                //                 type="primary"
+                //                 htmlType="submit"
+                //                 loading={isLoading}
+                //                 className="mr-4 text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                //             >
+                //                 Cập nhật
+                //             </Button>
+                //             <Button 
+                //             onClick={()=>setOpen(false)}
+                //             className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2 dark:border-gray-600 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-800"
+                //             >
+                //                 Cancel
+                //             </Button>
+                //         </Form.Item>
+                //     </Form>
+                // </Modal>
+                <ModalProduct type="update" data={data} open={open} setOpen={setOpen} />
+            )}
         </div>
     );
 };

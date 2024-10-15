@@ -15,7 +15,6 @@ import CreateVoucher from "../page/Voucher/CreateVoucher";
 import ListProduct from "../page/Product/ListProduct";
 import ListOrder from "../page/Order/ListOrder";
 import ProductDetail from "../page/Product/ProductDetail";
-import AddProduct from "../page/Product/AddProduct";
 import ListProvider from "../page/Provider/ListProvider";
 import ListStore from "../page/Store/ListStore";
 import StoreReceipt from "../page/Store/StoreReceipt";
@@ -73,10 +72,6 @@ const router = createBrowserRouter([
             {
                 path: APP_ROUTER.PRODUCTDETAIL,
                 element: <ProductDetail />,
-            },
-            {
-                path: APP_ROUTER.ADD_PRODUCT,
-                element: <AddProduct />,
             },
             {
                 path: APP_ROUTER.LIST_PROVIDER,
