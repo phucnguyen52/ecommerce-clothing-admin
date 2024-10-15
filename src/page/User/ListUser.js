@@ -31,7 +31,7 @@ const ListUser = () => {
     const fetchUsers = async () => {
         try {
             const response = await axios.get(
-                "http://localhost:8080/api/admin/user",
+                "http://localhost:8080/api/admin/user?sort=customer",
                 {
                     withCredentials: true,
                 }
@@ -116,7 +116,7 @@ const ListUser = () => {
             <TableComponent
                 title="Danh sách tài khoản"
                 columns={columns}
-                data={data}
+                data={data.user}
                 expandedRow={expandedRow}
                 onRowClick={handleRowClick}
                 onPageChange={handlePageChange}

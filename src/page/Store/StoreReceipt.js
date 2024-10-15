@@ -287,7 +287,7 @@ const StoreReceipt = () => {
                                     </h3>
                                     <select
                                         className="w-full p-2 border border-gray-300 rounded"
-                                        value={selectedVariantValue} // Liên kết giá trị của dropdown với state
+                                        value={selectedVariantValue}
                                         onChange={(e) => {
                                             const [
                                                 selectedColor,
@@ -305,7 +305,7 @@ const StoreReceipt = () => {
                                             setSelectedVariant(selected);
                                             setSelectedVariantValue(
                                                 e.target.value
-                                            ); // Cập nhật giá trị của dropdown
+                                            ); 
                                             console.log(
                                                 "Biến thể đã chọn:",
                                                 selected

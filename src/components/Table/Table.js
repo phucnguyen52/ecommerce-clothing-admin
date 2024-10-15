@@ -19,6 +19,8 @@ const Table = ({
     endDate,
     onDateChange,
     labelFilter,
+    admin,
+
 }) => {
     const [filters, setFilters] = useState({});
     const [selectedRows, setSelectedRows] = useState([]);
@@ -112,6 +114,16 @@ const Table = ({
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const defaultStartDate = sevenDaysAgo.toISOString().split("T")[0];
+    const provider = [
+        { id: "employee", fullname: "Nhân viên" },
+        { id: "manager", fullname: "Quản lý" },
+    ];
+    const [selectedRole, setSelectedRole] = useState('');
+
+    const handleChangeRole = (event) => {
+        console.log(event.target.value)
+      setSelectedRole(event.target.value);
+    };
     return (
         <div className="bg-white rounded-xl shadow-2xl max-h-screen m-4">
             <div className="flex justify-between items-center py-4 pl-3 bg-gray-100/80 border-b-[1px]">
@@ -155,6 +167,27 @@ const Table = ({
                                     <FaRegCalendarAlt className="w-5 h-5 text-gray-400" />
                                 </div>
                             </div>
+                        </div>
+                    )}
+                    {admin && (
+                        <div className="flex items-center gap-5 mr-3 ">
+                            <div className="s-2 text-base font-medium text-gray-900 dark:text-gray-300"></div>
+
+                            <select
+                                onChange={handleChangeRole}
+                                className="focus:outline-none max-w-80 py-3 px-4 pe-9 block w-full bg-gray-300 border-transparent rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:border-transparent dark:text-neutral-400 dark:focus:ring-neutral-600"
+                            >
+                                <option value="" className="bg-white">Chọn vị trí</option>
+                                {provider.map((provider) => (
+                                    <option
+                                        key={provider.id}
+                                        value={provider.id}
+                                        className="bg-white"
+                                    >
+                                        {provider.fullname}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     )}
                     {contentButton && (

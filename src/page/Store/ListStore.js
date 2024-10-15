@@ -138,7 +138,7 @@ const ListStore = () => {
                                                             rowSpan={
                                                                 product.details
                                                                     .length
-                                                            } // Số lượng hàng cần gộp
+                                                            } 
                                                         >
                                                             {
                                                                 product.product_name
@@ -189,7 +189,7 @@ const ListStore = () => {
                             <div>
                                 <MdAddCircleOutline className="w-6 h-6" />
                             </div>
-                            <div>Tổng số lượng: </div>
+                            <div>Tổng số lượng: {row.total_stock} </div>
                         </div>
                         <div className="flex gap-2 items-center my-3">
                             <div>
