@@ -5,8 +5,10 @@ import TableComponent from "../../components/Table/Table";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { toast } from "react-toastify";
+import ModalProduct from "../../components/Product/ModalProduct";
 
 const ListProduct = () => {
+    const [openCreate, setOpenCreate] = useState(false)
     const columns = [
         { key: "id", label: "Mã SP" },
         { key: "nameProduct", label: "Tên sản phẩm" },
@@ -21,7 +23,7 @@ const ListProduct = () => {
             key: "button",
             label: "Chỉnh sửa",
             render: (row) => {
-                console.log(row);
+                // console.log(row);
                 return (
                     <Link to={`/product/${row.id}`}>
                         <button className="mx-auto flex p-2 hover:bg-gray-200 hover:rounded-full">
@@ -56,7 +58,6 @@ const ListProduct = () => {
 
             if (response.status === 201) {
                 setData(response.data.product);
-                console.log("đã set", response.data.product);
             }
         } catch (error) {
             console.error(error);
@@ -116,9 +117,10 @@ const ListProduct = () => {
     };
     const handleAdd = () => {
         console.log("add");
-        navigate("/product-add");
+        setOpenCreate(true)
     };
     return (
+        <>
         <TableComponent
             columns={columns}
             data={data}
@@ -129,6 +131,8 @@ const ListProduct = () => {
             handleIsFilters={handleIsFilters}
             handleAdd={handleAdd}
         />
+        <ModalProduct type="create" open={openCreate} setOpen={setOpenCreate} />
+        </>
     );
 };
 
