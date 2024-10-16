@@ -28,18 +28,18 @@ const Voucher = () => {
     const handleRowClick = (voucher) => {
         setSelectedVoucher(voucher); // Cập nhật voucher đã chọn
     };
-    const handleUpdateStatus = async() => {
+    const handleUpdateStatus = async () => {
         const newStatus = selectedVoucher.status === 'active' ? 'stop' : selectedVoucher.status === 'stop' ? 'active' : null
-        if (newStatus){
+        if (newStatus) {
             try {
                 const response = await axios.put(
                     `http://localhost:8080/api/admin/voucher/${selectedVoucher.id}/status`,
-                    {status: newStatus},
+                    { status: newStatus },
                     { withCredentials: true }
                 );
 
                 if (response.status === 200) {
-                    setSelectedVoucher({...selectedVoucher, status: newStatus})
+                    setSelectedVoucher({ ...selectedVoucher, status: newStatus })
                     fetchVoucher()
                 }
             } catch (error) {
@@ -141,15 +141,51 @@ const Voucher = () => {
                             </div>
                         </div>
                         <div className="flex gap-1 my-4 flex-col">
-                            <div className="font-bold">Sản phẩm khuyến mãi</div>
+                            <div className="font-bold">Khuyến mãi</div>
                             <div className="italic text-base">
                                 Giảm {selectedVoucher.discountValue} {selectedVoucher.discountUnit === "percent" ? '%' : '.000VNĐ'}  khi mua từ {selectedVoucher.condition} sản phẩm.
                             </div>
                         </div>
                         <div className="flex gap-1 my-4 flex-col">
+                            <div className="font-bold">Sản phẩm áp dụng</div>
+                            <div className="italic text-base">
+                                {selectedVoucher.isAllProduct ? (
+                                    'Cho tất cả sản phẩm'
+                                ) : (
+                                    <>
+                                        <div>Các sản phẩm thuộc loại: </div>
+                                        <div className="font-semibold not-italic">
+                                            {selectedVoucher.Categories.map((i, index) => (
+                                                <span key={i.id}>
+                                                    {i.categoryName}
+                                                    {index < selectedVoucher.Categories.length - 1 ? ', ' : ''}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                        <div className="flex gap-1 my-4 flex-col">
                             <div className="font-bold">Đối tượng áp dụng</div>
                             <div className="italic text-base">
-                                {selectedVoucher.isAllUser ? 'Cho tất cả khách hàng' : 'Một số khách hàng cụ thể'}
+                                {selectedVoucher.isAllUser ? (
+                                    'Cho tất cả khách hàng'
+                                ) : (
+                                    <>
+                                        <div>Các khách hàng có MaKH là:</div>
+                                        <div className="font-semibold not-italic">
+                                            {selectedVoucher.Users.map((i, index) => (
+                                                <span key={i.id}>
+                                                    {i.id}
+                                                    {index < selectedVoucher.Users.length - 1 ? ', ' : ''}
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                    </>
+                                )}
                             </div>
                         </div>
                         <div className="flex gap-1 my-4 flex-col">
@@ -168,7 +204,7 @@ const Voucher = () => {
                             onClick={handleUpdateStatus}
                             className=" py-2.5 px-5 me-2 mb-2 mt-4 ml-auto flex justify-end text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-full border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 "
                         >
-                            {selectedVoucher.status==='active'?'Dừng khuyến mãi' : selectedVoucher.status==='stop'? 'Kích hoạt' : 'Bản nháp'}
+                            {selectedVoucher.status === 'active' ? 'Dừng khuyến mãi' : selectedVoucher.status === 'stop' ? 'Kích hoạt' : 'Bản nháp'}
                         </button>
                     </div>
                 )}
