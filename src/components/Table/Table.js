@@ -20,7 +20,7 @@ const Table = ({
     onDateChange,
     labelFilter,
     admin,
-
+    onRoleChange
 }) => {
     const [filters, setFilters] = useState({});
     const [selectedRows, setSelectedRows] = useState([]);
@@ -121,6 +121,7 @@ const Table = ({
     const [selectedRole, setSelectedRole] = useState('');
 
     const handleChangeRole = (event) => {
+        onRoleChange(event.target.value)
         console.log(event.target.value)
       setSelectedRole(event.target.value);
     };
