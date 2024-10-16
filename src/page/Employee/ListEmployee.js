@@ -42,8 +42,8 @@ const ListEmployee = () => {
             );
 
             if (response.status === 200) {
-                setData(response.data.user);
-                console.log("User data fetched successfully", response.data);
+                setData(response.data.user.user);
+                console.log("111", response.data.user.user);
             }
         } catch (error) {
             console.error("Error fetching user data:", error);
@@ -144,7 +144,7 @@ const ListEmployee = () => {
                 title="Danh sách nhân viên"
                 contentButton="Thêm nhân viên"
                 columns={columns}
-                data={data.user}
+                data={data}
                 admin="admin"
                 handleAdd={handleAdd}
                 expandedRow={expandedRow}

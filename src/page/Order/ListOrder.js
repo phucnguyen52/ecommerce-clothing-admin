@@ -5,6 +5,7 @@ import { MdAddCircleOutline } from "react-icons/md";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import { GiConfirmed } from "react-icons/gi";
 import axios from "axios";
+import { toast } from "react-toastify";
 const ListOrder = () => {
     const [expandedRow, setExpandedRow] = useState([]);
 
@@ -31,15 +32,12 @@ const ListOrder = () => {
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     const defaultStartDate = sevenDaysAgo.toISOString().split("T")[0];
-    const [startDate, setStartDate] = useState(defaultStartDate); 
+    const [startDate, setStartDate] = useState(defaultStartDate);
     const [endDate, setEndDate] = useState(today);
     const [data, setData] = useState([]);
 
-    // Hàm fetch dữ liệu
     const fetchData = async (startDate, endDate) => {
         if (startDate && endDate) {
-            console.log(startDate);
-            console.log(endDate);
             try {
                 const response = await axios.get(
                     `http://localhost:8080/api/admin/order?start='${startDate}'&end='${endDate}'`,
@@ -50,7 +48,6 @@ const ListOrder = () => {
 
                 if (response.status === 200) {
                     setData(response.data.order);
-                    console.log("dữ liệu", response.data.order);
                 }
             } catch (error) {
                 console.error(error);
@@ -61,7 +58,6 @@ const ListOrder = () => {
         fetchData(startDate, endDate);
     }, [startDate, endDate]);
     const handleDateChange = (newStartDate, newEndDate) => {
-        
         setStartDate(newStartDate);
         setEndDate(newEndDate);
     };
@@ -82,7 +78,48 @@ const ListOrder = () => {
     const handlePageChange = () => {
         setExpandedRow([]);
     };
+    const handelUpdate = async (row) => {
+        console.log(row);
+        let statusOrderId;
 
+        switch (row.statusOrder) {
+            case "Đang chờ xác nhận":
+                statusOrderId = "Đang chờ vận chuyển";
+                break;
+            case "Đang chờ vận chuyển":
+                statusOrderId = "Đang giao hàng";
+                break;
+            case "Đang giao hàng":
+                statusOrderId = "Đã giao hàng";
+                break;
+            default:
+                console.log("Trạng thái đơn hàng không hợp lệ.");
+                return;
+        }
+
+        try {
+            const response = await axios.put(
+                `http://localhost:8080/api/customer/order/${row.order_id}`,
+                {
+                    statusOrder: statusOrderId,
+                }
+            );
+
+            if (response.status === 200) {
+                fetchData(startDate, endDate);
+                toast.success("Cập nhật thành công", {
+                    autoClose: 1000,
+                });
+            } else {
+                console.log(
+                    "Yêu cầu không thành công, mã trạng thái:",
+                    response.status
+                );
+            }
+        } catch (error) {
+            console.error("Error updating order status:", error);
+        }
+    };
     const renderExpandedRow = (row) => {
         return (
             <div
@@ -133,7 +170,7 @@ const ListOrder = () => {
                                                             rowSpan={
                                                                 product.details
                                                                     .length
-                                                            } 
+                                                            }
                                                         >
                                                             {
                                                                 product.product_name
@@ -209,9 +246,12 @@ const ListOrder = () => {
                                 </div>
                             </div>
                         </div>
-                        {row.statusOrder === "Đang chờ xác nhận" ? (
+                        {row.statusOrder === "Đang chờ xác nhận" ||
+                        row.statusOrder === "Đang chờ vận chuyển" ||
+                        row.statusOrder === "Đang giao hàng" ? (
                             <div className="mt-3 flex justify-center">
                                 <button
+                                    onClick={() => handelUpdate(row)}
                                     type="button"
                                     className="text-gray-900 hover:text-white border border-gray-800 hover:bg-gray-900 focus:ring-4 focus:outline-none focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
                                 >
@@ -224,7 +264,7 @@ const ListOrder = () => {
             </div>
         );
     };
-    
+
     return (
         <>
             <TableComponent
@@ -233,7 +273,6 @@ const ListOrder = () => {
                 handleFetch={fetchData}
                 columns={columns}
                 data={data}
-               
                 expandedRow={expandedRow}
                 onRowClick={handleRowClick}
                 onPageChange={handlePageChange}

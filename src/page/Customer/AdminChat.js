@@ -1,43 +1,55 @@
 import React, { useEffect, useState, useRef } from "react";
 import io from "socket.io-client";
 import { IoSend } from "react-icons/io5";
-// Kết nối đến server backend qua Socket.IO
-const socket = io("http://localhost:5000");
+import axios from "axios";
 
+const socket = io("http://localhost:8080", {
+    withCredentials: true, 
+});
 const AdminChat = () => {
     const [rooms, setRooms] = useState([]);
-    const [currentRoom, setCurrentRoom] = useState("");
+    const [currentRoom, setCurrentRoom] = useState({});
     const [messages, setMessages] = useState([]);
     const [message, setMessage] = useState("");
 
-    // Hàm tải danh sách các phòng chat từ JSON Server
     const loadRooms = async () => {
         try {
-            const response = await fetch("http://localhost:5001/chats");
-            const data = await response.json();
-            setRooms(data.map((room) => room.id));
-        } catch (error) {
-            console.error("Error fetching rooms:", error);
-        }
-    };
-
-    // Hàm tải tin nhắn từ phòng chat hiện tại
-    const loadMessages = async (roomId) => {
-        try {
-            const response = await fetch(
-                `http://localhost:5001/chats/${roomId}`
+            const response = await axios.get(
+                "http://localhost:8080/api/customer/messenger",
+                {
+                    withCredentials: true,
+                }
             );
-            const data = await response.json();
-            if (data && data.messages) {
-                setMessages(data.messages);
-                console.log(data.messages);
+            if (response.data.succes) {
+                setRooms(response.data.message);
+            } else {
+                console.error(
+                    "Lỗi khi lấy danh sách người dùng:",
+                    response.data.message
+                );
             }
         } catch (error) {
-            console.error("Error fetching messages:", error);
+            console.error("Lỗi khi gọi API:", error);
         }
     };
-
-    // Khi admin chọn phòng chat mới
+    const loadMessages = async (currentRoom) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/api/customer/messenger/${currentRoom.id}?senderId=4`,
+                {
+                    withCredentials: true,
+                }
+            );
+            if (response.data.succes) {
+                setMessages(response.data.message);
+                console.log("1", response.data.message);
+            } else {
+                console.error("Không tìm thấy dữ liệu tin nhắn.");
+            }
+        } catch (error) {
+            console.error("Lỗi khi gọi API lấy tin nhắn:", error);
+        }
+    };
     useEffect(() => {
         if (currentRoom) {
             socket.emit("joinRoom", currentRoom);
@@ -58,43 +70,44 @@ const AdminChat = () => {
     const sendMessage = async () => {
         if (message.trim()) {
             const newMessage = {
-                sender: "admin",
-                messageContent: message,
-                messageTime: new Date().toISOString(),
-                sendID: "admin1",
-                receivedID: currentRoom,
+                messengerContent: message,
+                senderId: 4,
             };
+
             try {
-                const response = await fetch(
-                    `http://localhost:5001/chats/${currentRoom}`,
+                const response = await axios.post(
+                    `http://localhost:8080/api/customer/messenger/${currentRoom.id}`,
+                    newMessage,
                     {
-                        method: "PATCH",
+                        withCredentials: true,
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({
-                            messages: [...messages, newMessage],
-                        }),
                     }
                 );
 
-                if (response.ok) {
-                    socket.emit("sendMessage", {
-                        roomId: currentRoom,
-                        message: newMessage,
-                    });
+                if (response.status === 200) {
+                    loadMessages(currentRoom);
+                    socket.emit("sendMessage", newMessage);
+                    setMessages((prevMessages) => [
+                        ...prevMessages,
+                        newMessage,
+                    ]);
                     setMessage("");
                 } else {
-                    console.error("Error updating JSON Server");
+                    console.error(
+                        "Error sending message:",
+                        response.data.message
+                    );
                 }
             } catch (error) {
-                console.error("Error updating JSON Server:", error);
+                console.error("Error sending message:", error);
             }
         }
     };
     useEffect(() => {
         loadRooms();
-    }, []);
+    }, [currentRoom]);
     const lastMessageRef = useRef(null);
     useEffect(() => {
         if (lastMessageRef.current) {
@@ -108,16 +121,14 @@ const AdminChat = () => {
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
         const options = {
-            weekday: "short", // Thứ
+            weekday: "short",
             hour: "2-digit",
             minute: "2-digit",
         };
 
         if (diffDays < 7) {
-            // Nếu tin nhắn trong 7 ngày gần đây
-            return messageDate.toLocaleTimeString("vi-VN", options); // Giờ:phút
+            return messageDate.toLocaleTimeString("vi-VN", options);
         } else {
-            // Nếu tin nhắn cũ hơn 7 ngày
             return (
                 messageDate.toLocaleDateString("vi-VN", {
                     day: "2-digit",
@@ -126,7 +137,7 @@ const AdminChat = () => {
                 }) +
                 ", " +
                 messageDate.toLocaleTimeString("vi-VN", options)
-            ); // Ngày/tháng/năm, giờ:phút
+            );
         }
     };
     return (
@@ -134,24 +145,36 @@ const AdminChat = () => {
             <div className="flex flex-row h-screen w-[100%]">
                 {/* Danh sách các phòng chat */}
                 <div className="w-[30%] border-r-gray-100 border p-3 rounded-2xl m-2 shadow-md">
-                    <h3 className="text-3xl font-bold pb-3 text-center">Đoạn chat</h3>
+                    <h3 className="text-3xl font-bold pb-3 text-center">
+                        Đoạn chat
+                    </h3>
                     <div className="list-none p-0">
                         {rooms.map((room) => (
                             <div
-                                key={room}
+                                key={room.id}
                                 className={`flex items-center cursor-pointer p-2 rounded-md ${
-                                    room === currentRoom
+                                    room.id === currentRoom
                                         ? "bg-gray-200"
                                         : "bg-transparent"
                                 }`}
-                                onClick={() => setCurrentRoom(room)} // Admin chọn phòng chat
+                                onClick={() => {
+                                    setCurrentRoom(room);
+                                    console.log(room);
+                                }}
                             >
                                 <img
-                                    src="https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien-600x600.jpg"
-                                    alt=""
+                                    src={room.picture}
+                                    alt={room.fullName}
                                     className="w-10 h-10 rounded-full mr-2"
                                 />
-                                <div className="text-xl ">{room}</div>
+                                <div className="text-xl">
+                                    {room.fullName}
+                                    <div className="text-sm text-gray-500">
+                                        {new Date(
+                                            room.lastMessageTime
+                                        ).toLocaleString("vi-VN")}
+                                    </div>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -162,12 +185,12 @@ const AdminChat = () => {
                             <>
                                 <div className="flex pb-2">
                                     <img
-                                        src="https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien-600x600.jpg"
-                                        alt=""
+                                        src={currentRoom.picture}
+                                        alt="ảnh người dùng"
                                         className="w-10 h-10 rounded-full mr-2"
                                     />
                                     <div className="text-xl ">
-                                        {currentRoom}
+                                        {currentRoom.fullName}
                                     </div>
                                 </div>
                             </>
@@ -186,11 +209,11 @@ const AdminChat = () => {
                     >
                         <div className=" pl-5 flex-1 overflow-y-scroll scrollbar scrollbar-thumb-blue-300 scrollbar-track-white mb-5">
                             {messages.map((msg, index) => {
-                                const isUserMessage = msg.sender === "user";
+                                const isUserMessage = msg.senderId !== 4;
                                 const isLastUserMessage =
                                     isUserMessage &&
                                     (index === messages.length - 1 ||
-                                        messages[index + 1].sender !== "user");
+                                        messages[index + 1].senderId === 4);
 
                                 return (
                                     <div
@@ -201,7 +224,7 @@ const AdminChat = () => {
                                                 : null
                                         }
                                         className={`flex mr-2  ${
-                                            msg.sender === "admin"
+                                            msg.senderId === 4
                                                 ? "justify-end"
                                                 : "justify-start items-end"
                                         }`}
@@ -209,8 +232,8 @@ const AdminChat = () => {
                                         {isUserMessage && isLastUserMessage && (
                                             <div className="flex-shrink-0">
                                                 <img
-                                                    src="https://haycafe.vn/wp-content/uploads/2021/11/Anh-avatar-dep-chat-lam-hinh-dai-dien-600x600.jpg"
-                                                    alt="Admin Avatar"
+                                                    src={currentRoom.picture}
+                                                    alt={currentRoom.fullName}
                                                     className="w-9 h-9 rounded-full mr-1"
                                                 />
                                             </div>
@@ -218,13 +241,14 @@ const AdminChat = () => {
                                         <div className="relative">
                                             <div
                                                 className={`relative p-2 group rounded-2xl inline-block max-w-md break-words text-left ${
-                                                    msg.sender === "admin"
+                                                    msg.senderId === 4
                                                         ? "bg-blue-500 text-white"
                                                         : "bg-gray-200 text-black"
                                                 } ${
                                                     index > 0 &&
                                                     messages[index - 1]
-                                                        .sender !== msg.sender
+                                                        .senderId !==
+                                                        msg.senderId
                                                         ? "mt-3"
                                                         : "mt-[2px]"
                                                 }`}
@@ -236,16 +260,16 @@ const AdminChat = () => {
                                                             : "40px",
                                                 }}
                                             >
-                                                {msg.messageContent}
+                                                {msg.messengerContent}
                                                 <div
                                                     className={`${
-                                                        msg.sender === "admin"
+                                                        msg.senderId === 4
                                                             ? "right-full"
                                                             : "left-full"
                                                     } p-3 bg-stone-600 text-white rounded-xl mix-w-[200px] overflow-x-auto absolute top-[0%] back text-xs hidden z-50 group-hover:block whitespace-nowrap`}
                                                 >
                                                     {formatMessageTime(
-                                                        msg.messageTime
+                                                        msg.messengerTime
                                                     )}
                                                 </div>
                                             </div>

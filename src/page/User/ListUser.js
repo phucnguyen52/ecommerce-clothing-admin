@@ -70,7 +70,7 @@ const ListUser = () => {
             const newPassword = "123456";
 
             const response = await axios.put(
-                `http://localhost:8080/api/customer/${row.id}`,
+                `http://localhost:8080/api/admin/user/${row.id}`,
                 { password: newPassword },
                 {
                     withCredentials: true,

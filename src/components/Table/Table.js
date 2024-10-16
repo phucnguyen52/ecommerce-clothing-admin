@@ -20,7 +20,7 @@ const Table = ({
     onDateChange,
     labelFilter,
     admin,
-
+    onRoleChange
 }) => {
     const [filters, setFilters] = useState({});
     const [selectedRows, setSelectedRows] = useState([]);
@@ -55,8 +55,6 @@ const Table = ({
                   )
               )
             : [];
-
-    console.log("1111", filteredData);
 
     const getUniqueValues = (key) => {
         return [...new Set(data.map((item) => item[key]))];
@@ -118,11 +116,11 @@ const Table = ({
         { id: "employee", fullname: "Nhân viên" },
         { id: "manager", fullname: "Quản lý" },
     ];
-    const [selectedRole, setSelectedRole] = useState('');
+    const [selectedRole, setSelectedRole] = useState("");
 
     const handleChangeRole = (event) => {
-        console.log(event.target.value)
-      setSelectedRole(event.target.value);
+        setSelectedRole(event.target.value);
+        onRoleChange(event.target.value)
     };
     return (
         <div className="bg-white rounded-xl shadow-2xl max-h-screen m-4">
@@ -177,7 +175,9 @@ const Table = ({
                                 onChange={handleChangeRole}
                                 className="focus:outline-none max-w-80 py-3 px-4 pe-9 block w-full bg-gray-300 border-transparent rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-700 dark:border-transparent dark:text-neutral-400 dark:focus:ring-neutral-600"
                             >
-                                <option value="" className="bg-white">Chọn vị trí</option>
+                                <option value="" className="bg-white">
+                                    Chọn vị trí
+                                </option>
                                 {provider.map((provider) => (
                                     <option
                                         key={provider.id}

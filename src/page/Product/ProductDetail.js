@@ -40,6 +40,8 @@ const ProductDetail = () => {
             console.log("Error get rating", error);
         }
     };
+    console.log("data", data);
+    console.log("rating", imageUrl);
     const fetchProduct = async () => {
         try {
             const req1 = await fetch(`http://localhost:8080/api/customer/product/${id}`);
@@ -49,11 +51,11 @@ const ProductDetail = () => {
             if (res1.succes && res2.succes) {
                 const checkSize = !(res2.product.every(i => i.size.trim() === ''))
                 setData({
-                    ...res1.product,
+                    ...res1.product[0],
                     VariantProducts: res2.product,
                     isSize: checkSize
                 });
-                setImageUrl(JSON.parse(res1.product.image))
+                setImageUrl(JSON.parse(res1.product[0].image))
             } else {
                 console.error("ProductDetail: failed");
             }
